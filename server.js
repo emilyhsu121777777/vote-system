@@ -193,9 +193,7 @@ io.on("connection", (socket) => {
 });
 
 // Railway / 本地皆可運作的啟動方式
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 
