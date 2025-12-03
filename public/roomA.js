@@ -334,5 +334,33 @@ socket.on("yourChoice", (idx) => {
   socket.on(ev, handleFinal);
 });
 
+socket.on("reset", (data) => {
+  // 停掉前一次「最後 5 秒」的前端計時
+  if (endingTimerId) {
+    clearInterval(endingTimerId);
+    endingTimerId = null;
+  }
+
+  // 狀態回到 waiting（start.jpg 畫面）
+  statusNow = "waiting";
+
+  // 倒數時間重新設定（用伺服器傳來的，沒有就預設 60）
+  if (data && typeof data.countdown === "number") {
+    countdown = data.countdown;
+  } else {
+    countdown = 60;
+  }
+
+  // 清掉這一輪自己的投票紀錄 & 畫圖資料
+  hasVoted = false;
+  myChoiceIndex = null;
+  liveItems = [];
+  finalItems = [];
+
+  updateCountdownUI();
+  renderUI();
+});
+
+
 // 頁面載入先畫一次
 renderUI();

@@ -84,8 +84,10 @@
     </div>
     <div class="count" id="bigCountB">-</div>
 
+    <!-- ✅ 三顆按鈕：開始 / 公布結果 / 重置 -->
     <button class="btn btn-primary" id="btnStartB">開始投票（重置票數，120 秒）</button>
     <button class="btn btn-secondary" id="btnResultB">公布投票結果</button>
+    <button class="btn btn-secondary" id="btnResetB">重置（清空票數、回到開始畫面）</button>
 
     <div class="hint">
       前台網址：<br />
@@ -103,6 +105,7 @@
     const bigCount = document.getElementById("bigCountB");
     const btnStart = document.getElementById("btnStartB");
     const btnResult = document.getElementById("btnResultB");
+    const btnReset = document.getElementById("btnResetB"); // ⬅ 新增
 
     socket.on("connect", () => {
       socket.emit("join", { roomId, role: "admin" });
@@ -124,12 +127,20 @@
       bigCount.textContent = n;
     });
 
+    // 開始投票
     btnStart.addEventListener("click", () => {
       socket.emit("adminStart", roomId);
     });
 
+    // 公布結果
     btnResult.addEventListener("click", () => {
       socket.emit("adminShowResult", roomId);
+    });
+
+    // ✅ 重置：清空票數、回到 start.jpg 畫面
+    btnReset.addEventListener("click", () => {
+      if (!confirm("確定要重置？票數會全部清空並回到開始畫面。")) return;
+      socket.emit("adminReset", roomId);
     });
   </script>
 </body>

@@ -351,6 +351,66 @@ socketB.on("final", (payload) => {
   renderUIB();
 });
 
+
+
+// 後台按「重置」時，B 房前台要整個回到一開始的狀態
+socketB.on("reset", (data) => {
+  // 1. 停掉最後 5 秒的前端倒數計時（如果有）
+  if (typeof endingTimerIdB !== "undefined" && endingTimerIdB) {
+    clearInterval(endingTimerIdB);
+    endingTimerIdB = null;
+  }
+
+  // 2. 狀態改回 waiting（就是會出現 start.jpg 的那個狀態）
+  if (typeof statusNowB !== "undefined") {
+    statusNowB = "waiting";
+  }
+
+  // 3. 倒數時間重設（用後端給的為主，沒有就 120 秒）
+  if (typeof countdownB !== "undefined") {
+    if (data && typeof data.countdown === "number") {
+      countdownB = data.countdown;
+    } else {
+      countdownB = 120; // 你當初設定的 B 房倒數秒數
+    }
+  }
+
+  // 4. 票數全部歸零
+  if (typeof liveVotesB !== "undefined" && Array.isArray(liveVotesB)) {
+    liveVotesB = liveVotesB.map(() => 0);
+  }
+
+  // 5. 清掉這一輪自己的選擇 & 已投票紀錄
+  if (typeof hasVotedB !== "undefined") {
+    hasVotedB = false;
+  }
+  if (typeof myChoicesB !== "undefined") {
+    myChoicesB = [];
+  }
+  if (typeof selectedIndexesB !== "undefined") {
+    selectedIndexesB = [];
+  }
+
+  // 6. 更新「已選擇 0 / 3」與送出按鈕狀態
+  if (typeof selectedCountB !== "undefined" && selectedCountB) {
+    selectedCountB.textContent = "已選擇 0 / 3";
+  }
+  if (typeof submitB !== "undefined" && submitB) {
+    submitB.disabled = true;
+  }
+
+  // 7. 重新畫畫面（回到 start.jpg 畫面）
+  if (typeof updateCountdownUIB === "function") {
+    updateCountdownUIB();
+  }
+  if (typeof renderUIB === "function") {
+    renderUIB();
+  }
+
+  console.log("Room B reset from server");
+});
+
+
 // 初始化
 buildCards();
 renderUIB();
