@@ -15,18 +15,18 @@ app.use(express.static("public"));
 const rooms = {
   A: {
     title: "第一輪公演",
-    duration: 60,          // 秒
+    duration: 30,          // 秒
     status: "waiting",     // waiting / voting / ending / ended
-    countdown: 60,
+    countdown: 30,
     votes: [0, 0, 0, 0],   // 4 個選項
     timer: null,
     clients: {},           // { clientId: { index, indices: [...] } }
   },
   B: {
     title: "建築小姐",
-    duration: 120,                     // Room B：120 秒
+    duration: 90,                     // Room B：90 秒
     status: "waiting",
-    countdown: 120,
+    countdown: 90,
     votes: new Array(24).fill(0),      // 24 個選項
     timer: null,
     clients: {},                       // 每個 client 3 票
@@ -47,16 +47,22 @@ io.on("connection", (socket) => {
   console.log("a user connected:", socket.id);
 
   function joinRoom(roomId) {
-    const room = rooms[roomId];
-    if (!room) return;
-    socket.join(roomId);
+  const room = rooms[roomId];
+  if (!room) return;
+  socket.join(roomId);
 
-    socket.emit("init", {
-      status: room.status,
-      countdown: room.countdown,
-      votes: room.votes,
-    });
+  socket.emit("init", {
+    status: room.status,
+    countdown: room.countdown,
+    votes: room.votes,
+  });
+
+  // ✅ 如果現在已經在「公布結果」階段，剛進來的人也要看到結果
+  if (room.status === "result") {
+    socket.emit("final", { votes: room.votes });
   }
+}
+
 
   socket.on("join", ({ roomId }) => {
     joinRoom(roomId);
@@ -178,14 +184,53 @@ io.on("connection", (socket) => {
     }, 1000);
   });
 
-  // 後台：公布結果
-  socket.on("adminShowResult", (roomId) => {
+// 後台：公布結果
+socket.on("adminShowResult", (roomId) => {
+  const room = rooms[roomId];
+  if (!room) return;
+
+  console.log(`Room ${roomId} show final result`);
+
+  // ✅ 1) 狀態改成 result（表示現在是「公布結果」階段）
+  room.status = "result";
+  io.to(roomId).emit("status", room.status);
+
+  // ✅ 2) 把最終票數丟給所有前台
+  io.to(roomId).emit("final", { votes: room.votes });
+});
+
+
+
+  // 🔄 後台：重置房間
+  socket.on("adminReset", (roomId) => {
     const room = rooms[roomId];
     if (!room) return;
 
-    console.log(`Room ${roomId} show final result`);
-    io.to(roomId).emit("final", { votes: room.votes });
+    console.log(`Room ${roomId} RESET`);
+
+    // 停止計時器
+    if (room.timer) {
+      clearInterval(room.timer);
+      room.timer = null;
+    }
+
+    // 回到初始狀態
+    room.status = "waiting";          // 顯示 start.jpg 用的狀態
+    room.countdown = room.duration;   // 重設倒數秒數
+    room.votes = new Array(room.votes.length).fill(0);
+    room.clients = {};                // 清空該輪已投票紀錄
+
+    // 通知前台
+    io.to(roomId).emit("reset", {
+      status: room.status,
+      countdown: room.countdown,
+      votes: room.votes
+    });
+
+    // 通知後台（可有可無）
+    io.to(`admin-${roomId}`).emit("resetDone", roomId);
   });
+
 
   socket.on("disconnect", () => {
     console.log("user disconnected:", socket.id);

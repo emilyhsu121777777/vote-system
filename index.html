@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>投票入口</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: url("background.jpg") center/cover no-repeat fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .overlay {
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.5); /* 更接近你其他頁面的透明白 */
+      position: absolute;
+      inset: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1D4ED8;
+      margin-bottom: 35px;
+      text-shadow: 0 0 8px rgba(255,255,255,0.7);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 18px 0;
+      margin-bottom: 18px;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      text-decoration: none;
+      transition: 0.2s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn-A {
+      background: #60A5FA; /* 淺藍 */
+    }
+
+    .btn-B {
+      background: #60A5FA; /* 你指定的藍紫色 */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="overlay"></div>
+
+  <div class="container">
+    <div class="title">活動投票入口</div>
+
+    <a href="roomA.html" class="btn btn-A">第一輪公演</a>
+    <a href="roomB.html" class="btn btn-B">建築小姐</a>
+  </div>
+</body>
+</html>
